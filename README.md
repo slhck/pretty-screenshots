@@ -34,7 +34,6 @@ A self-contained HTML/JS app to make your screenshots more presentable by adding
 ## TODOs
 
 - [ ] Add fake device frames (e.g., phone, tablet, desktop browsers)
-- [ ] Implement more advanced shadow options (e.g., shadow offset, direction, blur, ...)
 
 ## License
 
