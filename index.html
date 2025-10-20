@@ -29,7 +29,7 @@
       <div class="control-group">
         <label class="control-label">
           <span>Padding</span>
-          <span class="control-value" id="paddingValue">10%</span>
+          <span class="control-value" id="paddingValue">10.0%</span>
         </label>
         <input type="range" id="paddingSlider" min="0" max="50" value="10" step="0.5">
       </div>
@@ -38,7 +38,7 @@
       <div class="control-group">
         <label class="control-label">
           <span>Rounded</span>
-          <span class="control-value" id="roundedValue">2%</span>
+          <span class="control-value" id="roundedValue">2.0%</span>
         </label>
         <input type="range" id="roundedSlider" min="0" max="10" value="2" step="0.1">
       </div>
@@ -84,9 +84,6 @@
           <div class="background-option bg-beach" data-bg="beach">
             <span>Beach</span>
           </div>
-          <div class="background-option bg-violet" data-bg="violet">
-            <span>Violet</span>
-          </div>
           <div class="background-option bg-rose" data-bg="rose">
             <span>Rose</span>
           </div>
@@ -102,6 +99,18 @@
           <div class="background-option bg-none" data-bg="none">
             <span>None</span>
           </div>
+          <div class="background-option bg-custom" data-bg="custom">
+            <span>Custom</span>
+          </div>
+        </div>
+        <div class="custom-gradient-wrapper hidden" id="customGradientWrapper">
+          <label class="control-label" style="margin-top: 0.75rem; margin-bottom: 0.5rem;">
+            <span>Custom Gradient</span>
+            <a href="https://cssgradient.io/" target="_blank" rel="noopener noreferrer" title="Open CSS Gradient Generator">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </a>
+          </label>
+          <input type="text" id="customGradientInput" placeholder="linear-gradient(90deg, #667eea 0%, #764ba2 100%)" class="custom-gradient-input">
         </div>
       </div>
 
@@ -153,9 +162,18 @@
           <span>Export</span>
         </label>
         <div class="export-group">
-          <button class="button" id="downloadPNG">Download PNG</button>
-          <button class="button button-secondary" id="downloadJPEG">Download JPEG</button>
-          <button class="button button-secondary" id="copyClipboard">Copy to Clipboard</button>
+          <button class="button" id="downloadPNG">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PNG
+          </button>
+          <button class="button button-secondary" id="downloadJPEG">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download JPEG
+          </button>
+          <button class="button button-secondary" id="copyClipboard">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy to Clipboard
+          </button>
         </div>
       </div>
     </div>
@@ -185,6 +203,7 @@
       shadowOpacity: 50,
       shadowColor: '#000000',
       background: 'cool',
+      customGradient: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
       ratio: 'auto',
       zoom: 100,
       offsetX: 0,
@@ -199,12 +218,12 @@
       desktop: { type: 'gradient', value: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
       cool: { type: 'gradient', value: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' },
       beach: { type: 'gradient', value: 'linear-gradient(135deg, #14b8a6 0%, #0891b2 100%)' },
-      violet: { type: 'gradient', value: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)' },
       rose: { type: 'gradient', value: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 100%)' },
       love: { type: 'gradient', value: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)' },
       flower: { type: 'gradient', value: 'linear-gradient(135deg, #f9a8d4 0%, #fbbf24 100%)' },
       sky: { type: 'gradient', value: 'linear-gradient(135deg, #38bdf8 0%, #e0f2fe 100%)' },
-      none: { type: 'transparent', value: null }
+      none: { type: 'transparent', value: null },
+      custom: { type: 'custom', value: null }
     };
 
     // Aspect ratios
@@ -239,6 +258,21 @@
     const offsetXValue = document.getElementById('offsetXValue');
     const offsetYSlider = document.getElementById('offsetYSlider');
     const offsetYValue = document.getElementById('offsetYValue');
+    const customGradientWrapper = document.getElementById('customGradientWrapper');
+    const customGradientInput = document.getElementById('customGradientInput');
+
+    // Update offset controls based on zoom
+    function updateOffsetControls() {
+      const isZoomed = state.zoom !== 100;
+      offsetXSlider.disabled = !isZoomed;
+      offsetYSlider.disabled = !isZoomed;
+
+      // Visual feedback
+      const offsetGroup = offsetXSlider.closest('.control-group');
+      if (offsetGroup) {
+        offsetGroup.style.opacity = isZoomed ? '1' : '0.5';
+      }
+    }
 
     // Initialize event listeners
     function init() {
@@ -257,19 +291,19 @@
       // Slider controls
       paddingSlider.addEventListener('input', (e) => {
         state.padding = parseFloat(e.target.value);
-        paddingValue.textContent = state.padding + '%';
+        paddingValue.textContent = state.padding.toFixed(1) + '%';
         render();
       });
 
       roundedSlider.addEventListener('input', (e) => {
         state.rounded = parseFloat(e.target.value);
-        roundedValue.textContent = state.rounded + '%';
+        roundedValue.textContent = state.rounded.toFixed(1) + '%';
         render();
       });
 
       shadowSlider.addEventListener('input', (e) => {
         state.shadow = parseFloat(e.target.value);
-        shadowValue.textContent = state.shadow + '%';
+        shadowValue.textContent = state.shadow.toFixed(1) + '%';
         render();
       });
 
@@ -287,6 +321,7 @@
       zoomSlider.addEventListener('input', (e) => {
         state.zoom = parseInt(e.target.value);
         zoomValue.textContent = state.zoom + '%';
+        updateOffsetControls();
         render();
       });
 
@@ -344,8 +379,24 @@
           document.querySelectorAll('.background-option').forEach(o => o.classList.remove('active'));
           this.classList.add('active');
           state.background = this.dataset.bg;
+
+          // Show/hide custom gradient input
+          if (state.background === 'custom') {
+            customGradientWrapper.classList.remove('hidden');
+          } else {
+            customGradientWrapper.classList.add('hidden');
+          }
+
           render();
         });
+      });
+
+      // Custom gradient input
+      customGradientInput.addEventListener('input', (e) => {
+        state.customGradient = e.target.value.replace(/;$/, ''); // Remove trailing semicolon if present
+        if (state.background === 'custom') {
+          render();
+        }
       });
 
       // Ratio selection
@@ -438,6 +489,7 @@
           zoomSlider.value = 100;
           zoomValue.textContent = '100%';
 
+          updateOffsetControls();
           dropZone.classList.add('hidden');
           canvasWrapper.classList.remove('hidden');
           render();
@@ -562,6 +614,70 @@
             ctx.fillRect(x, y, squareSize, squareSize);
           }
         }
+      } else if (bg.type === 'custom') {
+        // Custom gradient from user input
+        try {
+          // Create a temporary div to apply the gradient
+          const tempDiv = document.createElement('div');
+          tempDiv.style.background = state.customGradient;
+          tempDiv.style.width = width + 'px';
+          tempDiv.style.height = height + 'px';
+          document.body.appendChild(tempDiv);
+
+          // Get computed style to validate
+          const computedStyle = window.getComputedStyle(tempDiv);
+          const bgImage = computedStyle.backgroundImage;
+
+          document.body.removeChild(tempDiv);
+
+          // If valid, parse and draw the gradient
+          if (bgImage && bgImage !== 'none') {
+            const gradientMatch = state.customGradient.match(/linear-gradient\(([^,]+),(.+)\)/);
+
+            if (gradientMatch) {
+              const angle = gradientMatch[1].trim();
+              const colorStops = gradientMatch[2].split(/,(?![^(]*\))/).map(s => s.trim());
+
+              // Parse angle
+              let x0 = 0, y0 = 0, x1 = 0, y1 = height;
+              if (angle.includes('deg')) {
+                const degrees = parseFloat(angle);
+                const radians = (degrees - 90) * Math.PI / 180;
+                x1 = width * Math.cos(radians);
+                y1 = height * Math.sin(radians);
+
+                if (degrees === 90) {
+                  x0 = 0; y0 = 0; x1 = width; y1 = 0;
+                } else if (degrees === 135) {
+                  x0 = 0; y0 = 0; x1 = width; y1 = height;
+                } else if (degrees === 180) {
+                  x0 = 0; y0 = 0; x1 = 0; y1 = height;
+                }
+              }
+
+              const gradient = ctx.createLinearGradient(x0, y0, x1, y1);
+
+              // Add color stops
+              colorStops.forEach(stop => {
+                const match = stop.match(/(.+?)\s+(\d+%)/);
+                if (match) {
+                  const color = match[1].trim();
+                  const position = parseFloat(match[2]) / 100;
+                  gradient.addColorStop(position, color);
+                }
+              });
+
+              ctx.fillStyle = gradient;
+              ctx.fillRect(0, 0, width, height);
+            }
+          } else {
+            // Fallback to default if invalid
+            drawDefaultGradient(width, height);
+          }
+        } catch (e) {
+          console.error('Invalid gradient:', e);
+          drawDefaultGradient(width, height);
+        }
       } else if (bg.type === 'gradient') {
         // Parse gradient
         const gradientMatch = bg.value.match(/linear-gradient\(([^,]+),\s*([^)]+)\s+(\d+%),\s*([^)]+)\s+(\d+%)\)/);
@@ -586,6 +702,15 @@
           ctx.fillRect(0, 0, width, height);
         }
       }
+    }
+
+    // Fallback gradient for invalid custom gradients
+    function drawDefaultGradient(width, height) {
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(1, '#764ba2');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
     }
 
     // Helper function for rounded rectangles
@@ -649,10 +774,10 @@
 
           // Visual feedback
           const btn = document.getElementById('copyClipboard');
-          const originalText = btn.textContent;
-          btn.textContent = 'Copied!';
+          const originalHTML = btn.innerHTML;
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Copied!';
           setTimeout(() => {
-            btn.textContent = originalText;
+            btn.innerHTML = originalHTML;
           }, 2000);
         });
       } catch (err) {

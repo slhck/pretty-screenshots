@@ -193,6 +193,21 @@ input[type="range"]::-moz-range-thumb:hover {
   box-shadow: 0 3px 12px rgba(59, 130, 246, 0.6);
 }
 
+input[type="range"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+input[type="range"]:disabled::-webkit-slider-thumb {
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+input[type="range"]:disabled::-moz-range-thumb {
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.3);
+}
+
 /* Checkbox styling */
 .checkbox-wrapper {
   display: flex;
@@ -270,6 +285,50 @@ input[type="color"]:hover {
   gap: 0.5rem;
 }
 
+/* Custom gradient input */
+.custom-gradient-wrapper {
+  margin-top: 0.75rem;
+}
+
+.custom-gradient-input {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #e5e7eb;
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.2s;
+}
+
+.custom-gradient-input:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.custom-gradient-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.control-label a {
+  display: inline-flex;
+  align-items: center;
+  color: #93bbfc;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.control-label a:hover {
+  color: #a8c7ff;
+  transform: scale(1.1);
+}
+
+.control-label a svg {
+  display: block;
+}
+
 .background-option {
   aspect-ratio: 1;
   border-radius: 0.5rem;
@@ -316,8 +375,8 @@ input[type="color"]:hover {
   background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
 }
 
-.bg-violet {
-  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+.bg-custom {
+  background: conic-gradient(from 90deg at 50% 50%, #667eea 0deg, #764ba2 90deg, #f093fb 180deg, #667eea 360deg);
 }
 
 .bg-rose {
@@ -396,6 +455,10 @@ input[type="color"]:hover {
   font-weight: 500;
   text-align: center;
   font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .button:hover {
