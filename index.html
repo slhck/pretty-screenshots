@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pretty Screenshots</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Main canvas area -->
+    <div class="canvas-area">
+      <div class="drop-zone" id="dropZone">
+        <h2>Drop your screenshot here</h2>
+        <p>or click to browse</p>
+        <p>You can also paste from clipboard (<code>Ctrl+V</code> or <code>⌘+V</code>)</p>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+      </div>
+      <div class="canvas-wrapper hidden" id="canvasWrapper">
+        <canvas id="preview-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Control panel -->
+    <div class="control-panel">
+      <h3>Your Preset</h3>
+
+      <!-- Padding control -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Padding</span>
+          <span class="control-value" id="paddingValue">100</span>
+        </label>
+        <input type="range" id="paddingSlider" min="0" max="200" value="100">
+      </div>
+
+      <!-- Inset control -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Inset</span>
+          <span class="control-value" id="insetValue">0</span>
+        </label>
+        <input type="range" id="insetSlider" min="0" max="100" value="0">
+      </div>
+
+      <!-- Rounded corners control -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Rounded</span>
+          <span class="control-value" id="roundedValue">20</span>
+        </label>
+        <input type="range" id="roundedSlider" min="0" max="50" value="20">
+      </div>
+
+      <!-- Shadow control -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Shadow</span>
+          <span class="control-value" id="shadowValue">25</span>
+        </label>
+        <input type="range" id="shadowSlider" min="0" max="100" value="25">
+      </div>
+
+      <!-- Shadow opacity control -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Shadow Opacity</span>
+          <span class="control-value" id="shadowOpacityValue">50</span>
+        </label>
+        <input type="range" id="shadowOpacitySlider" min="0" max="100" value="50">
+      </div>
+
+      <!-- Shadow color control -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Shadow Color</span>
+        </label>
+        <input type="color" id="shadowColorPicker" value="#000000">
+      </div>
+
+      <!-- Balance toggle -->
+      <div class="control-group">
+        <label class="checkbox-wrapper">
+          <input type="checkbox" id="balanceToggle" checked>
+          <span>Balance</span>
+        </label>
+      </div>
+
+      <!-- Background selection -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Background</span>
+        </label>
+        <div class="background-grid">
+          <div class="background-option bg-desktop" data-bg="desktop">
+            <span>Desktop</span>
+          </div>
+          <div class="background-option bg-cool active" data-bg="cool">
+            <span>Cool</span>
+          </div>
+          <div class="background-option bg-beach" data-bg="beach">
+            <span>Beach</span>
+          </div>
+          <div class="background-option bg-violet" data-bg="violet">
+            <span>Violet</span>
+          </div>
+          <div class="background-option bg-rose" data-bg="rose">
+            <span>Rose</span>
+          </div>
+          <div class="background-option bg-love" data-bg="love">
+            <span>Love</span>
+          </div>
+          <div class="background-option bg-flower" data-bg="flower">
+            <span>Flower</span>
+          </div>
+          <div class="background-option bg-sky" data-bg="sky">
+            <span>Sky</span>
+          </div>
+          <div class="background-option bg-none" data-bg="none">
+            <span>None</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ratio / Size presets -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Ratio / Size</span>
+        </label>
+        <div class="ratio-grid">
+          <button class="ratio-btn active" data-ratio="auto">Auto</button>
+          <button class="ratio-btn" data-ratio="4:3">4:3</button>
+          <button class="ratio-btn" data-ratio="3:2">3:2</button>
+          <button class="ratio-btn" data-ratio="16:9">16:9</button>
+          <button class="ratio-btn" data-ratio="1:1">1:1</button>
+          <button class="ratio-btn" data-ratio="twitter">Twitter</button>
+          <button class="ratio-btn" data-ratio="facebook">Facebook</button>
+          <button class="ratio-btn" data-ratio="instagram">Instagram</button>
+        </div>
+      </div>
+
+      <!-- Export buttons -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Export</span>
+        </label>
+        <div class="export-group">
+          <button class="button" id="downloadPNG">Download PNG</button>
+          <button class="button button-secondary" id="downloadJPEG">Download JPEG</button>
+          <button class="button button-secondary" id="copyClipboard">Copy to Clipboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>
+      <a href="https://github.com/slhck/pretty-screenshots" target="_blank" rel="noopener noreferrer">
+        View on GitHub
+      </a>
+    </p>
+  </footer>
+
+  <script>
+    // Application state
+    const state = {
+      image: null,
+      padding: 100,
+      inset: 0,
+      rounded: 20,
+      shadow: 25,
+      shadowOpacity: 50,
+      shadowColor: '#000000',
+      balance: true,
+      background: 'cool',
+      ratio: 'auto'
+    };
+
+    // Background gradients
+    const backgrounds = {
+      desktop: { type: 'gradient', value: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+      cool: { type: 'gradient', value: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' },
+      beach: { type: 'gradient', value: 'linear-gradient(135deg, #14b8a6 0%, #0891b2 100%)' },
+      violet: { type: 'gradient', value: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)' },
+      rose: { type: 'gradient', value: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 100%)' },
+      love: { type: 'gradient', value: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)' },
+      flower: { type: 'gradient', value: 'linear-gradient(135deg, #f9a8d4 0%, #fbbf24 100%)' },
+      sky: { type: 'gradient', value: 'linear-gradient(135deg, #38bdf8 0%, #e0f2fe 100%)' },
+      none: { type: 'transparent', value: null }
+    };
+
+    // Aspect ratios
+    const ratios = {
+      'auto': null,
+      '4:3': 4/3,
+      '3:2': 3/2,
+      '16:9': 16/9,
+      '1:1': 1/1,
+      'twitter': 16/9,
+      'facebook': 1.91/1,
+      'instagram': 1/1
+    };
+
+    // DOM elements
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const canvasWrapper = document.getElementById('canvasWrapper');
+    const canvas = document.getElementById('preview-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Control elements
+    const paddingSlider = document.getElementById('paddingSlider');
+    const paddingValue = document.getElementById('paddingValue');
+    const insetSlider = document.getElementById('insetSlider');
+    const insetValue = document.getElementById('insetValue');
+    const roundedSlider = document.getElementById('roundedSlider');
+    const roundedValue = document.getElementById('roundedValue');
+    const shadowSlider = document.getElementById('shadowSlider');
+    const shadowValue = document.getElementById('shadowValue');
+    const shadowOpacitySlider = document.getElementById('shadowOpacitySlider');
+    const shadowOpacityValue = document.getElementById('shadowOpacityValue');
+    const shadowColorPicker = document.getElementById('shadowColorPicker');
+    const balanceToggle = document.getElementById('balanceToggle');
+
+    // Initialize event listeners
+    function init() {
+      // Drop zone events
+      dropZone.addEventListener('click', () => fileInput.click());
+      dropZone.addEventListener('dragover', handleDragOver);
+      dropZone.addEventListener('dragleave', handleDragLeave);
+      dropZone.addEventListener('drop', handleDrop);
+
+      // File input
+      fileInput.addEventListener('change', handleFileSelect);
+
+      // Clipboard paste
+      document.addEventListener('paste', handlePaste);
+
+      // Slider controls
+      paddingSlider.addEventListener('input', (e) => {
+        state.padding = parseInt(e.target.value);
+        paddingValue.textContent = state.padding;
+        render();
+      });
+
+      insetSlider.addEventListener('input', (e) => {
+        state.inset = parseInt(e.target.value);
+        insetValue.textContent = state.inset;
+        render();
+      });
+
+      roundedSlider.addEventListener('input', (e) => {
+        state.rounded = parseInt(e.target.value);
+        roundedValue.textContent = state.rounded;
+        render();
+      });
+
+      shadowSlider.addEventListener('input', (e) => {
+        state.shadow = parseInt(e.target.value);
+        shadowValue.textContent = state.shadow;
+        render();
+      });
+
+      shadowOpacitySlider.addEventListener('input', (e) => {
+        state.shadowOpacity = parseInt(e.target.value);
+        shadowOpacityValue.textContent = state.shadowOpacity;
+        render();
+      });
+
+      shadowColorPicker.addEventListener('input', (e) => {
+        state.shadowColor = e.target.value;
+        render();
+      });
+
+      balanceToggle.addEventListener('change', (e) => {
+        state.balance = e.target.checked;
+        render();
+      });
+
+      // Background selection
+      document.querySelectorAll('.background-option').forEach(option => {
+        option.addEventListener('click', function() {
+          document.querySelectorAll('.background-option').forEach(o => o.classList.remove('active'));
+          this.classList.add('active');
+          state.background = this.dataset.bg;
+          render();
+        });
+      });
+
+      // Ratio selection
+      document.querySelectorAll('.ratio-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          state.ratio = this.dataset.ratio;
+          render();
+        });
+      });
+
+      // Export buttons
+      document.getElementById('downloadPNG').addEventListener('click', () => downloadImage('png'));
+      document.getElementById('downloadJPEG').addEventListener('click', () => downloadImage('jpeg'));
+      document.getElementById('copyClipboard').addEventListener('click', copyToClipboard);
+    }
+
+    // Drag and drop handlers
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.remove('drag-over');
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.remove('drag-over');
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0 && files[0].type.startsWith('image/')) {
+        loadImage(files[0]);
+      }
+    }
+
+    // File selection handler
+    function handleFileSelect(e) {
+      const files = e.target.files;
+      if (files.length > 0) {
+        loadImage(files[0]);
+      }
+    }
+
+    // Clipboard paste handler
+    function handlePaste(e) {
+      // Allow normal paste if focus is on an input
+      const active = document.activeElement;
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
+        return;
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+
+      for (const item of items) {
+        if (item.type.indexOf('image') === 0) {
+          const file = item.getAsFile();
+          loadImage(file);
+          break;
+        }
+      }
+    }
+
+    // Load image from file
+    function loadImage(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          state.image = img;
+          dropZone.classList.add('hidden');
+          canvasWrapper.classList.remove('hidden');
+          render();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Render canvas
+    function render() {
+      if (!state.image) return;
+
+      const img = state.image;
+      const padding = state.padding;
+      const inset = state.inset;
+      const rounded = state.rounded;
+      const shadow = state.shadow;
+
+      // Calculate dimensions
+      let imgWidth = img.width;
+      let imgHeight = img.height;
+
+      // Apply aspect ratio if set
+      const targetRatio = ratios[state.ratio];
+      if (targetRatio) {
+        const currentRatio = imgWidth / imgHeight;
+        if (currentRatio > targetRatio) {
+          // Image is wider than target ratio
+          imgWidth = imgHeight * targetRatio;
+        } else {
+          // Image is taller than target ratio
+          imgHeight = imgWidth / targetRatio;
+        }
+      }
+
+      // Calculate canvas size with extra space for shadow
+      const shadowPadding = shadow > 0 ? Math.ceil(shadow * 1.5) : 0;
+      const canvasWidth = imgWidth + (padding * 2) + (shadowPadding * 2);
+      const canvasHeight = imgHeight + (padding * 2) + (shadowPadding * 2);
+
+      // Set canvas size
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      // Draw background
+      drawBackground(canvasWidth, canvasHeight);
+
+      // Calculate image position
+      let x, y;
+
+      if (state.balance) {
+        // Center the image in the canvas
+        x = (canvasWidth - imgWidth) / 2;
+        y = (canvasHeight - imgHeight) / 2;
+      } else {
+        // Position at padding offset (top-left alignment with padding)
+        x = padding + shadowPadding;
+        y = padding + shadowPadding;
+      }
+
+      // Calculate effective dimensions with inset
+      const effectiveX = x + inset;
+      const effectiveY = y + inset;
+      const effectiveWidth = imgWidth - (inset * 2);
+      const effectiveHeight = imgHeight - (inset * 2);
+
+      // Draw shadow first (as a filled rounded rectangle)
+      if (shadow > 0) {
+        ctx.save();
+
+        // Convert hex color to rgba with opacity
+        const shadowColorRgba = hexToRgba(state.shadowColor, state.shadowOpacity / 100);
+        ctx.shadowColor = shadowColorRgba;
+        ctx.shadowBlur = shadow;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = shadow / 4;
+
+        // Draw a filled rounded rectangle to create the shadow
+        ctx.fillStyle = state.shadowColor;
+        roundRect(ctx, effectiveX, effectiveY, effectiveWidth, effectiveHeight, rounded);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // Draw image with rounded corners (no shadow)
+      ctx.save();
+
+      // Create rounded rectangle clipping path
+      roundRect(ctx, effectiveX, effectiveY, effectiveWidth, effectiveHeight, rounded);
+      ctx.clip();
+
+      // Draw the image
+      const sx = (img.width - imgWidth) / 2;
+      const sy = (img.height - imgHeight) / 2;
+
+      ctx.drawImage(
+        img,
+        Math.max(0, sx),
+        Math.max(0, sy),
+        Math.min(img.width, imgWidth),
+        Math.min(img.height, imgHeight),
+        effectiveX,
+        effectiveY,
+        effectiveWidth,
+        effectiveHeight
+      );
+
+      ctx.restore();
+    }
+
+    // Draw background
+    function drawBackground(width, height) {
+      const bg = backgrounds[state.background];
+
+      if (bg.type === 'transparent') {
+        // Transparent checkered pattern
+        const squareSize = 20;
+        for (let y = 0; y < height; y += squareSize) {
+          for (let x = 0; x < width; x += squareSize) {
+            const isEven = ((x / squareSize) + (y / squareSize)) % 2 === 0;
+            ctx.fillStyle = isEven ? '#1a1a1a' : '#2a2a2a';
+            ctx.fillRect(x, y, squareSize, squareSize);
+          }
+        }
+      } else if (bg.type === 'gradient') {
+        // Parse gradient
+        const gradientMatch = bg.value.match(/linear-gradient\(([^,]+),\s*([^)]+)\s+(\d+%),\s*([^)]+)\s+(\d+%)\)/);
+
+        if (gradientMatch) {
+          const angle = gradientMatch[1];
+          const color1 = gradientMatch[2];
+          const color2 = gradientMatch[4];
+
+          // Create gradient
+          let gradient;
+          if (angle.includes('135deg')) {
+            gradient = ctx.createLinearGradient(0, 0, width, height);
+          } else {
+            gradient = ctx.createLinearGradient(0, 0, 0, height);
+          }
+
+          gradient.addColorStop(0, color1);
+          gradient.addColorStop(1, color2);
+
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, width, height);
+        }
+      }
+    }
+
+    // Helper function for rounded rectangles
+    function roundRect(ctx, x, y, width, height, radius) {
+      if (radius === 0) {
+        ctx.rect(x, y, width, height);
+        return;
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    // Helper function to convert hex color to rgba
+    function hexToRgba(hex, alpha) {
+      // Remove # if present
+      hex = hex.replace('#', '');
+
+      // Parse hex values
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    // Download image
+    function downloadImage(format) {
+      if (!state.image) return;
+
+      const link = document.createElement('a');
+      link.download = `screenshot-${Date.now()}.${format}`;
+
+      if (format === 'png') {
+        link.href = canvas.toDataURL('image/png');
+      } else if (format === 'jpeg') {
+        link.href = canvas.toDataURL('image/jpeg', 0.95);
+      }
+
+      link.click();
+    }
+
+    // Copy to clipboard
+    async function copyToClipboard() {
+      if (!state.image) return;
+
+      try {
+        canvas.toBlob(async (blob) => {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+
+          // Visual feedback
+          const btn = document.getElementById('copyClipboard');
+          const originalText = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(() => {
+            btn.textContent = originalText;
+          }, 2000);
+        });
+      } catch (err) {
+        console.error('Failed to copy to clipboard:', err);
+        alert('Failed to copy to clipboard. Your browser may not support this feature.');
+      }
+    }
+
+    // Initialize the app
+    init();
+  </script>
+</body>
+</html>
