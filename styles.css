@@ -394,10 +394,6 @@ input[type="color"]:hover {
 }
 
 /* Background presets */
-.bg-desktop {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
 .bg-cool {
   background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
 }
@@ -435,6 +431,10 @@ input[type="color"]:hover {
   background-size: 20px 20px;
   background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
   background-color: #1a1a1a;
+}
+
+.bg-solid {
+  background: #667eea;
 }
 
 /* Ratio buttons */

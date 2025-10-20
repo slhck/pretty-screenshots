@@ -91,7 +91,7 @@
       <!-- Shadow color control -->
       <div class="control-group">
         <label class="control-label">
-          <span>Color</span>
+          <span>Shadow Color</span>
         </label>
         <input type="color" id="shadowColorPicker" value="#000000">
       </div>
@@ -107,9 +107,6 @@
           <span>Preset</span>
         </label>
         <div class="background-grid">
-          <div class="background-option bg-desktop" data-bg="desktop">
-            <span>Desktop</span>
-          </div>
           <div class="background-option bg-cool active" data-bg="cool">
             <span>Cool</span>
           </div>
@@ -131,9 +128,18 @@
           <div class="background-option bg-none" data-bg="none">
             <span>None</span>
           </div>
+          <div class="background-option bg-solid" data-bg="solid">
+            <span>Solid Color</span>
+          </div>
           <div class="background-option bg-custom" data-bg="custom">
             <span>Custom</span>
           </div>
+        </div>
+        <div class="custom-gradient-wrapper hidden" id="solidColorWrapper">
+          <label class="control-label" style="margin-top: 0.75rem; margin-bottom: 0.5rem;">
+            <span>Background Color</span>
+          </label>
+          <input type="color" id="solidColorPicker" value="#667eea">
         </div>
         <div class="custom-gradient-wrapper hidden" id="customGradientWrapper">
           <label class="control-label" style="margin-top: 0.75rem; margin-bottom: 0.5rem;">
@@ -248,6 +254,7 @@
       shadowOpacity: 50,
       shadowColor: '#000000',
       background: 'cool',
+      solidColor: '#667eea',
       customGradient: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
       ratio: 'auto',
       zoom: 100,
@@ -260,7 +267,6 @@
 
     // Background gradients
     const backgrounds = {
-      desktop: { type: 'gradient', value: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
       cool: { type: 'gradient', value: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' },
       beach: { type: 'gradient', value: 'linear-gradient(135deg, #14b8a6 0%, #0891b2 100%)' },
       rose: { type: 'gradient', value: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 100%)' },
@@ -268,6 +274,7 @@
       flower: { type: 'gradient', value: 'linear-gradient(135deg, #f9a8d4 0%, #fbbf24 100%)' },
       sky: { type: 'gradient', value: 'linear-gradient(135deg, #38bdf8 0%, #e0f2fe 100%)' },
       none: { type: 'transparent', value: null },
+      solid: { type: 'solid', value: null },
       custom: { type: 'custom', value: null }
     };
 
@@ -307,6 +314,8 @@
     const offsetXValue = document.getElementById('offsetXValue');
     const offsetYSlider = document.getElementById('offsetYSlider');
     const offsetYValue = document.getElementById('offsetYValue');
+    const solidColorWrapper = document.getElementById('solidColorWrapper');
+    const solidColorPicker = document.getElementById('solidColorPicker');
     const customGradientWrapper = document.getElementById('customGradientWrapper');
     const customGradientInput = document.getElementById('customGradientInput');
 
@@ -316,10 +325,14 @@
       offsetXSlider.disabled = !isZoomed;
       offsetYSlider.disabled = !isZoomed;
 
-      // Visual feedback
-      const offsetGroup = offsetXSlider.closest('.control-group');
-      if (offsetGroup) {
-        offsetGroup.style.opacity = isZoomed ? '1' : '0.5';
+      // Visual feedback for both control groups
+      const offsetXGroup = offsetXSlider.closest('.control-group');
+      const offsetYGroup = offsetYSlider.closest('.control-group');
+      if (offsetXGroup) {
+        offsetXGroup.style.opacity = isZoomed ? '1' : '0.5';
+      }
+      if (offsetYGroup) {
+        offsetYGroup.style.opacity = isZoomed ? '1' : '0.5';
       }
     }
 
@@ -441,15 +454,28 @@
           this.classList.add('active');
           state.background = this.dataset.bg;
 
-          // Show/hide custom gradient input
-          if (state.background === 'custom') {
+          // Show/hide solid color picker
+          if (state.background === 'solid') {
+            solidColorWrapper.classList.remove('hidden');
+            customGradientWrapper.classList.add('hidden');
+          } else if (state.background === 'custom') {
+            solidColorWrapper.classList.add('hidden');
             customGradientWrapper.classList.remove('hidden');
           } else {
+            solidColorWrapper.classList.add('hidden');
             customGradientWrapper.classList.add('hidden');
           }
 
           render();
         });
+      });
+
+      // Solid color picker
+      solidColorPicker.addEventListener('input', (e) => {
+        state.solidColor = e.target.value;
+        if (state.background === 'solid') {
+          render();
+        }
       });
 
       // Custom gradient input
@@ -681,6 +707,10 @@
             ctx.fillRect(x, y, squareSize, squareSize);
           }
         }
+      } else if (bg.type === 'solid') {
+        // Solid color background
+        ctx.fillStyle = state.solidColor;
+        ctx.fillRect(0, 0, width, height);
       } else if (bg.type === 'custom') {
         // Custom gradient from user input
         try {
