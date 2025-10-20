@@ -34,15 +34,6 @@
         <input type="range" id="paddingSlider" min="0" max="200" value="100">
       </div>
 
-      <!-- Inset control -->
-      <div class="control-group">
-        <label class="control-label">
-          <span>Inset</span>
-          <span class="control-value" id="insetValue">0</span>
-        </label>
-        <input type="range" id="insetSlider" min="0" max="100" value="0">
-      </div>
-
       <!-- Rounded corners control -->
       <div class="control-group">
         <label class="control-label">
@@ -76,14 +67,6 @@
           <span>Shadow Color</span>
         </label>
         <input type="color" id="shadowColorPicker" value="#000000">
-      </div>
-
-      <!-- Balance toggle -->
-      <div class="control-group">
-        <label class="checkbox-wrapper">
-          <input type="checkbox" id="balanceToggle" checked>
-          <span>Balance</span>
-        </label>
       </div>
 
       <!-- Background selection -->
@@ -137,6 +120,34 @@
           <button class="ratio-btn" data-ratio="facebook">Facebook</button>
           <button class="ratio-btn" data-ratio="instagram">Instagram</button>
         </div>
+        <div style="margin-top: 1rem;">
+          <label class="control-label">
+            <span>Zoom</span>
+            <span class="control-value" id="zoomValue">100%</span>
+          </label>
+          <input type="range" id="zoomSlider" min="50" max="200" value="100">
+        </div>
+      </div>
+
+      <!-- Position controls -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Position</span>
+        </label>
+        <div style="margin-bottom: 0.75rem;">
+          <label class="control-label" style="font-size: 0.8rem;">
+            <span>X Offset</span>
+            <span class="control-value" id="offsetXValue">0</span>
+          </label>
+          <input type="range" id="offsetXSlider" min="-500" max="500" value="0">
+        </div>
+        <div>
+          <label class="control-label" style="font-size: 0.8rem;">
+            <span>Y Offset</span>
+            <span class="control-value" id="offsetYValue">0</span>
+          </label>
+          <input type="range" id="offsetYSlider" min="-500" max="500" value="0">
+        </div>
       </div>
 
       <!-- Export buttons -->
@@ -167,14 +178,18 @@
     const state = {
       image: null,
       padding: 100,
-      inset: 0,
       rounded: 20,
       shadow: 25,
       shadowOpacity: 50,
       shadowColor: '#000000',
-      balance: true,
       background: 'cool',
-      ratio: 'auto'
+      ratio: 'auto',
+      zoom: 100,
+      offsetX: 0,
+      offsetY: 0,
+      isDragging: false,
+      dragStartX: 0,
+      dragStartY: 0
     };
 
     // Background gradients
@@ -212,8 +227,6 @@
     // Control elements
     const paddingSlider = document.getElementById('paddingSlider');
     const paddingValue = document.getElementById('paddingValue');
-    const insetSlider = document.getElementById('insetSlider');
-    const insetValue = document.getElementById('insetValue');
     const roundedSlider = document.getElementById('roundedSlider');
     const roundedValue = document.getElementById('roundedValue');
     const shadowSlider = document.getElementById('shadowSlider');
@@ -221,7 +234,12 @@
     const shadowOpacitySlider = document.getElementById('shadowOpacitySlider');
     const shadowOpacityValue = document.getElementById('shadowOpacityValue');
     const shadowColorPicker = document.getElementById('shadowColorPicker');
-    const balanceToggle = document.getElementById('balanceToggle');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const zoomValue = document.getElementById('zoomValue');
+    const offsetXSlider = document.getElementById('offsetXSlider');
+    const offsetXValue = document.getElementById('offsetXValue');
+    const offsetYSlider = document.getElementById('offsetYSlider');
+    const offsetYValue = document.getElementById('offsetYValue');
 
     // Initialize event listeners
     function init() {
@@ -241,12 +259,6 @@
       paddingSlider.addEventListener('input', (e) => {
         state.padding = parseInt(e.target.value);
         paddingValue.textContent = state.padding;
-        render();
-      });
-
-      insetSlider.addEventListener('input', (e) => {
-        state.inset = parseInt(e.target.value);
-        insetValue.textContent = state.inset;
         render();
       });
 
@@ -273,9 +285,58 @@
         render();
       });
 
-      balanceToggle.addEventListener('change', (e) => {
-        state.balance = e.target.checked;
+      zoomSlider.addEventListener('input', (e) => {
+        state.zoom = parseInt(e.target.value);
+        zoomValue.textContent = state.zoom + '%';
         render();
+      });
+
+      offsetXSlider.addEventListener('input', (e) => {
+        state.offsetX = parseInt(e.target.value);
+        offsetXValue.textContent = state.offsetX;
+        render();
+      });
+
+      offsetYSlider.addEventListener('input', (e) => {
+        state.offsetY = parseInt(e.target.value);
+        offsetYValue.textContent = state.offsetY;
+        render();
+      });
+
+      // Canvas drag to reposition
+      canvas.addEventListener('mousedown', (e) => {
+        if (!state.image) return;
+        state.isDragging = true;
+        state.dragStartX = e.clientX;
+        state.dragStartY = e.clientY;
+        canvas.style.cursor = 'grabbing';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!state.isDragging) return;
+        const deltaX = e.clientX - state.dragStartX;
+        const deltaY = e.clientY - state.dragStartY;
+
+        state.offsetX += deltaX;
+        state.offsetY += deltaY;
+
+        // Update slider values
+        offsetXSlider.value = state.offsetX;
+        offsetXValue.textContent = state.offsetX;
+        offsetYSlider.value = state.offsetY;
+        offsetYValue.textContent = state.offsetY;
+
+        state.dragStartX = e.clientX;
+        state.dragStartY = e.clientY;
+
+        render();
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (state.isDragging) {
+          state.isDragging = false;
+          canvas.style.cursor = 'grab';
+        }
       });
 
       // Background selection
@@ -365,6 +426,19 @@
         const img = new Image();
         img.onload = () => {
           state.image = img;
+          // Reset position when loading new image
+          state.offsetX = 0;
+          state.offsetY = 0;
+          state.zoom = 100;
+
+          // Update UI
+          offsetXSlider.value = 0;
+          offsetXValue.textContent = 0;
+          offsetYSlider.value = 0;
+          offsetYValue.textContent = 0;
+          zoomSlider.value = 100;
+          zoomValue.textContent = '100%';
+
           dropZone.classList.add('hidden');
           canvasWrapper.classList.remove('hidden');
           render();
@@ -380,31 +454,29 @@
 
       const img = state.image;
       const padding = state.padding;
-      const inset = state.inset;
       const rounded = state.rounded;
       const shadow = state.shadow;
+      const zoomFactor = state.zoom / 100;
 
-      // Calculate dimensions
-      let imgWidth = img.width;
-      let imgHeight = img.height;
+      // Calculate output dimensions based on aspect ratio
+      let outputWidth = img.width;
+      let outputHeight = img.height;
 
       // Apply aspect ratio if set
       const targetRatio = ratios[state.ratio];
       if (targetRatio) {
-        const currentRatio = imgWidth / imgHeight;
+        const currentRatio = outputWidth / outputHeight;
         if (currentRatio > targetRatio) {
-          // Image is wider than target ratio
-          imgWidth = imgHeight * targetRatio;
+          outputWidth = outputHeight * targetRatio;
         } else {
-          // Image is taller than target ratio
-          imgHeight = imgWidth / targetRatio;
+          outputHeight = outputWidth / targetRatio;
         }
       }
 
-      // Calculate canvas size with extra space for shadow
+      // Calculate canvas size (FIXED, not affected by zoom)
       const shadowPadding = shadow > 0 ? Math.ceil(shadow * 1.5) : 0;
-      const canvasWidth = imgWidth + (padding * 2) + (shadowPadding * 2);
-      const canvasHeight = imgHeight + (padding * 2) + (shadowPadding * 2);
+      const canvasWidth = outputWidth + (padding * 2) + (shadowPadding * 2);
+      const canvasHeight = outputHeight + (padding * 2) + (shadowPadding * 2);
 
       // Set canvas size
       canvas.width = canvasWidth;
@@ -416,68 +488,63 @@
       // Draw background
       drawBackground(canvasWidth, canvasHeight);
 
-      // Calculate image position
-      let x, y;
+      // Calculate the area of the source image to sample (affected by zoom)
+      // Higher zoom = smaller source area = zoomed in
+      // Lower zoom = larger source area = zoomed out
+      const sourceWidth = outputWidth / zoomFactor;
+      const sourceHeight = outputHeight / zoomFactor;
 
-      if (state.balance) {
-        // Center the image in the canvas
-        x = (canvasWidth - imgWidth) / 2;
-        y = (canvasHeight - imgHeight) / 2;
-      } else {
-        // Position at padding offset (top-left alignment with padding)
-        x = padding + shadowPadding;
-        y = padding + shadowPadding;
-      }
+      // Calculate source center with offset applied
+      const sourceCenterX = (img.width / 2) - state.offsetX;
+      const sourceCenterY = (img.height / 2) - state.offsetY;
 
-      // Calculate effective dimensions with inset
-      const effectiveX = x + inset;
-      const effectiveY = y + inset;
-      const effectiveWidth = imgWidth - (inset * 2);
-      const effectiveHeight = imgHeight - (inset * 2);
+      // Calculate source rectangle
+      let sx = sourceCenterX - (sourceWidth / 2);
+      let sy = sourceCenterY - (sourceHeight / 2);
 
-      // Draw shadow first (as a filled rounded rectangle)
+      // Clamp source rectangle to image bounds
+      sx = Math.max(0, Math.min(sx, img.width - sourceWidth));
+      sy = Math.max(0, Math.min(sy, img.height - sourceHeight));
+
+      // Output position (centered in canvas with padding)
+      const outputX = (canvasWidth - outputWidth) / 2;
+      const outputY = (canvasHeight - outputHeight) / 2;
+
+      // Draw shadow first
       if (shadow > 0) {
         ctx.save();
 
-        // Convert hex color to rgba with opacity
         const shadowColorRgba = hexToRgba(state.shadowColor, state.shadowOpacity / 100);
         ctx.shadowColor = shadowColorRgba;
         ctx.shadowBlur = shadow;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = shadow / 4;
 
-        // Draw a filled rounded rectangle to create the shadow
         ctx.fillStyle = state.shadowColor;
-        roundRect(ctx, effectiveX, effectiveY, effectiveWidth, effectiveHeight, rounded);
+        roundRect(ctx, outputX, outputY, outputWidth, outputHeight, rounded);
         ctx.fill();
 
         ctx.restore();
       }
 
-      // Draw image with rounded corners (no shadow)
+      // Draw image with rounded corners
       ctx.save();
 
       // Create rounded rectangle clipping path
-      roundRect(ctx, effectiveX, effectiveY, effectiveWidth, effectiveHeight, rounded);
+      roundRect(ctx, outputX, outputY, outputWidth, outputHeight, rounded);
       ctx.clip();
 
-      // Draw the image
-      const sx = (img.width - imgWidth) / 2;
-      const sy = (img.height - imgHeight) / 2;
-
+      // Draw the image (sampling from source rectangle to output rectangle)
       ctx.drawImage(
         img,
-        Math.max(0, sx),
-        Math.max(0, sy),
-        Math.min(img.width, imgWidth),
-        Math.min(img.height, imgHeight),
-        effectiveX,
-        effectiveY,
-        effectiveWidth,
-        effectiveHeight
+        sx, sy, sourceWidth, sourceHeight,  // source rectangle (what to sample)
+        outputX, outputY, outputWidth, outputHeight  // destination rectangle (where to draw)
       );
 
       ctx.restore();
+
+      // Set cursor style when image is loaded
+      canvas.style.cursor = state.isDragging ? 'grabbing' : 'grab';
     }
 
     // Draw background
