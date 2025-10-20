@@ -21,9 +21,13 @@
       </div>
     </div>
 
-    <!-- Control panel -->
-    <div class="control-panel">
-      <h3>Your Preset</h3>
+    <!-- Right sidebar with controls and export -->
+    <div class="sidebar">
+      <!-- Control panel -->
+      <div class="control-panel">
+
+      <!-- SIZE SECTION -->
+      <div class="section-header">SIZE</div>
 
       <!-- Padding control -->
       <div class="control-group">
@@ -37,25 +41,48 @@
       <!-- Rounded corners control -->
       <div class="control-group">
         <label class="control-label">
-          <span>Rounded</span>
+          <span>Rounded Corners</span>
           <span class="control-value" id="roundedValue">2.0%</span>
         </label>
         <input type="range" id="roundedSlider" min="0" max="10" value="2" step="0.1">
       </div>
 
+      <div class="section-separator"></div>
+
+      <!-- SHADOW SECTION -->
+      <div class="section-header">SHADOW</div>
+
       <!-- Shadow control -->
       <div class="control-group">
         <label class="control-label">
-          <span>Shadow</span>
+          <span>Blur</span>
           <span class="control-value" id="shadowValue">2.5%</span>
         </label>
         <input type="range" id="shadowSlider" min="0" max="10" value="2.5" step="0.1">
       </div>
 
+      <!-- Shadow offset X control -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Offset X</span>
+          <span class="control-value" id="shadowOffsetXValue">0.0%</span>
+        </label>
+        <input type="range" id="shadowOffsetXSlider" min="-5" max="5" value="0" step="0.1">
+      </div>
+
+      <!-- Shadow offset Y control -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Offset Y</span>
+          <span class="control-value" id="shadowOffsetYValue">0.6%</span>
+        </label>
+        <input type="range" id="shadowOffsetYSlider" min="-5" max="5" value="0.6" step="0.1">
+      </div>
+
       <!-- Shadow opacity control -->
       <div class="control-group">
         <label class="control-label">
-          <span>Shadow Opacity</span>
+          <span>Opacity</span>
           <span class="control-value" id="shadowOpacityValue">50</span>
         </label>
         <input type="range" id="shadowOpacitySlider" min="0" max="100" value="50">
@@ -64,15 +91,20 @@
       <!-- Shadow color control -->
       <div class="control-group">
         <label class="control-label">
-          <span>Shadow Color</span>
+          <span>Color</span>
         </label>
         <input type="color" id="shadowColorPicker" value="#000000">
       </div>
 
+      <div class="section-separator"></div>
+
+      <!-- BACKGROUND SECTION -->
+      <div class="section-header">BACKGROUND</div>
+
       <!-- Background selection -->
       <div class="control-group">
         <label class="control-label">
-          <span>Background</span>
+          <span>Preset</span>
         </label>
         <div class="background-grid">
           <div class="background-option bg-desktop" data-bg="desktop">
@@ -114,10 +146,15 @@
         </div>
       </div>
 
+      <div class="section-separator"></div>
+
+      <!-- CANVAS SECTION -->
+      <div class="section-header">CANVAS</div>
+
       <!-- Ratio / Size presets -->
       <div class="control-group">
         <label class="control-label">
-          <span>Ratio / Size</span>
+          <span>Aspect Ratio</span>
         </label>
         <div class="ratio-grid">
           <button class="ratio-btn active" data-ratio="auto">Auto</button>
@@ -126,58 +163,64 @@
           <button class="ratio-btn" data-ratio="16:9">16:9</button>
           <button class="ratio-btn" data-ratio="1:1">1:1</button>
         </div>
-        <div style="margin-top: 1rem;">
-          <label class="control-label">
-            <span>Zoom</span>
-            <span class="control-value" id="zoomValue">100%</span>
-          </label>
-          <input type="range" id="zoomSlider" min="50" max="200" value="100">
-        </div>
       </div>
+
+      <!-- Zoom control -->
+      <div class="control-group">
+        <label class="control-label">
+          <span>Zoom</span>
+          <span class="control-value" id="zoomValue">100%</span>
+        </label>
+        <input type="range" id="zoomSlider" min="50" max="200" value="100">
+      </div>
+
+      <div class="section-separator"></div>
+
+      <!-- POSITION SECTION -->
+      <div class="section-header">POSITION</div>
 
       <!-- Position controls -->
       <div class="control-group">
         <label class="control-label">
-          <span>Position</span>
+          <span>X Offset</span>
+          <span class="control-value" id="offsetXValue">0</span>
         </label>
-        <div style="margin-bottom: 0.75rem;">
-          <label class="control-label" style="font-size: 0.8rem;">
-            <span>X Offset</span>
-            <span class="control-value" id="offsetXValue">0</span>
-          </label>
-          <input type="range" id="offsetXSlider" min="-500" max="500" value="0">
-        </div>
-        <div>
-          <label class="control-label" style="font-size: 0.8rem;">
-            <span>Y Offset</span>
-            <span class="control-value" id="offsetYValue">0</span>
-          </label>
-          <input type="range" id="offsetYSlider" min="-500" max="500" value="0">
-        </div>
+        <input type="range" id="offsetXSlider" min="-500" max="500" value="0">
       </div>
 
-      <!-- Export buttons -->
       <div class="control-group">
         <label class="control-label">
-          <span>Export</span>
+          <span>Y Offset</span>
+          <span class="control-value" id="offsetYValue">0</span>
         </label>
-        <div class="export-group">
-          <button class="button" id="downloadPNG">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download PNG
-          </button>
-          <button class="button button-secondary" id="downloadJPEG">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download JPEG
-          </button>
-          <button class="button button-secondary" id="copyClipboard">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Copy to Clipboard
-          </button>
-        </div>
+        <input type="range" id="offsetYSlider" min="-500" max="500" value="0">
+      </div>
+
+      <div class="section-separator"></div>
+
+    </div>
+
+    <!-- Export section (sticky) -->
+    <div class="export-section">
+      <div class="export-grid">
+        <button class="export-btn export-btn-primary" id="downloadPNG">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          PNG
+        </button>
+        <button class="export-btn export-btn-primary" id="downloadJPEG">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          JPG
+        </button>
+        <button class="export-btn export-btn-secondary" id="copyClipboard">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy to Clipboard
+        </button>
       </div>
     </div>
-  </div>
+
+    </div><!-- Close sidebar -->
+
+  </div><!-- Close app-container -->
 
   <!-- Footer -->
   <footer class="footer">
@@ -199,7 +242,9 @@
       image: null,
       padding: 10,  // percentage of image width
       rounded: 2,   // percentage of image width
-      shadow: 2.5,  // percentage of image width
+      shadow: 2.5,  // percentage of image width (blur)
+      shadowOffsetX: 0,  // percentage of image width
+      shadowOffsetY: 0.6,  // percentage of image width
       shadowOpacity: 50,
       shadowColor: '#000000',
       background: 'cool',
@@ -249,6 +294,10 @@
     const roundedValue = document.getElementById('roundedValue');
     const shadowSlider = document.getElementById('shadowSlider');
     const shadowValue = document.getElementById('shadowValue');
+    const shadowOffsetXSlider = document.getElementById('shadowOffsetXSlider');
+    const shadowOffsetXValue = document.getElementById('shadowOffsetXValue');
+    const shadowOffsetYSlider = document.getElementById('shadowOffsetYSlider');
+    const shadowOffsetYValue = document.getElementById('shadowOffsetYValue');
     const shadowOpacitySlider = document.getElementById('shadowOpacitySlider');
     const shadowOpacityValue = document.getElementById('shadowOpacityValue');
     const shadowColorPicker = document.getElementById('shadowColorPicker');
@@ -304,6 +353,18 @@
       shadowSlider.addEventListener('input', (e) => {
         state.shadow = parseFloat(e.target.value);
         shadowValue.textContent = state.shadow.toFixed(1) + '%';
+        render();
+      });
+
+      shadowOffsetXSlider.addEventListener('input', (e) => {
+        state.shadowOffsetX = parseFloat(e.target.value);
+        shadowOffsetXValue.textContent = state.shadowOffsetX.toFixed(1) + '%';
+        render();
+      });
+
+      shadowOffsetYSlider.addEventListener('input', (e) => {
+        state.shadowOffsetY = parseFloat(e.target.value);
+        shadowOffsetYValue.textContent = state.shadowOffsetY.toFixed(1) + '%';
         render();
       });
 
@@ -525,9 +586,15 @@
       const padding = Math.round(img.width * (state.padding / 100));
       const rounded = Math.round(img.width * (state.rounded / 100));
       const shadow = Math.round(img.width * (state.shadow / 100));
+      const shadowOffsetX = Math.round(img.width * (state.shadowOffsetX / 100));
+      const shadowOffsetY = Math.round(img.width * (state.shadowOffsetY / 100));
 
-      // Calculate canvas size (FIXED, not affected by zoom)
-      const shadowPadding = shadow > 0 ? Math.ceil(shadow * 1.5) : 0;
+      // Calculate canvas size to accommodate shadow (FIXED, not affected by zoom)
+      // Need to account for blur spread and offset to ensure shadow isn't clipped
+      const shadowPadding = shadow > 0 ? Math.max(
+        Math.ceil(shadow * 1.5 + Math.abs(shadowOffsetX)),
+        Math.ceil(shadow * 1.5 + Math.abs(shadowOffsetY))
+      ) : 0;
       const canvasWidth = outputWidth + (padding * 2) + (shadowPadding * 2);
       const canvasHeight = outputHeight + (padding * 2) + (shadowPadding * 2);
 
@@ -564,14 +631,14 @@
       const outputY = (canvasHeight - outputHeight) / 2;
 
       // Draw shadow first
-      if (shadow > 0) {
+      if (shadow > 0 || shadowOffsetX !== 0 || shadowOffsetY !== 0) {
         ctx.save();
 
         const shadowColorRgba = hexToRgba(state.shadowColor, state.shadowOpacity / 100);
         ctx.shadowColor = shadowColorRgba;
         ctx.shadowBlur = shadow;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = shadow / 4;
+        ctx.shadowOffsetX = shadowOffsetX;
+        ctx.shadowOffsetY = shadowOffsetY;
 
         ctx.fillStyle = state.shadowColor;
         roundRect(ctx, outputX, outputY, outputWidth, outputHeight, rounded);
