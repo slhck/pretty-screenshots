@@ -617,12 +617,13 @@
 
       // Calculate canvas size to accommodate shadow (FIXED, not affected by zoom)
       // Need to account for blur spread and offset to ensure shadow isn't clipped
+      // Note: these have been fixed and multiplied by 1.0 to ensure the padding is not too strong.
       const shadowPadding = shadow > 0 ? Math.max(
-        Math.ceil(shadow * 1.5 + Math.abs(shadowOffsetX)),
-        Math.ceil(shadow * 1.5 + Math.abs(shadowOffsetY))
+        Math.ceil(shadow * 1.0 + Math.abs(shadowOffsetX)),
+        Math.ceil(shadow * 1.0 + Math.abs(shadowOffsetY))
       ) : 0;
-      const canvasWidth = outputWidth + (padding * 2) + (shadowPadding * 2);
-      const canvasHeight = outputHeight + (padding * 2) + (shadowPadding * 2);
+      const canvasWidth = outputWidth + (padding * 1) + (shadowPadding * 1);
+      const canvasHeight = outputHeight + (padding * 1) + (shadowPadding * 1);
 
       // Set canvas size
       canvas.width = canvasWidth;
@@ -797,6 +798,8 @@
 
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, width, height);
+        } else {
+          console.warn('Invalid predefined gradient format.');
         }
       }
     }
