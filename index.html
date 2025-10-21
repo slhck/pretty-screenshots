@@ -141,9 +141,30 @@
           </label>
           <input type="color" id="solidColorPicker" value="#667eea">
         </div>
+        <div class="custom-gradient-wrapper hidden" id="gradientDirectionWrapper">
+          <label class="control-label" style="margin-top: 0.75rem; margin-bottom: 0.5rem;">
+            <span>Gradient Direction</span>
+          </label>
+          <div class="gradient-direction-controls">
+            <button class="gradient-direction-btn active" data-direction="diagonal">Diagonal</button>
+            <button class="gradient-direction-btn" data-direction="vertical">Vertical</button>
+            <button class="gradient-direction-btn" data-direction="radial">Radial</button>
+          </div>
+        </div>
         <div class="custom-gradient-wrapper hidden" id="customGradientWrapper">
           <label class="control-label" style="margin-top: 0.75rem; margin-bottom: 0.5rem;">
-            <span>Custom Gradient</span>
+            <span>Gradient Colors</span>
+            <button class="gradient-swap-btn" id="swapGradientColors" title="Swap gradient colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+            </button>
+          </label>
+          <div class="gradient-color-pickers">
+            <input type="color" id="gradientColor1" value="#667eea" title="Start color">
+            <input type="color" id="gradientColor2" value="#764ba2" title="End color">
+          </div>
+
+          <label class="control-label" style="margin-top: 0.75rem; margin-bottom: 0.5rem;">
+            <span>Or Use Custom Gradient</span>
             <a href="https://cssgradient.io/" target="_blank" rel="noopener noreferrer" title="Open CSS Gradient Generator">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             </a>
@@ -257,6 +278,10 @@
       background: 'cool',
       solidColor: '#667eea',
       customGradient: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
+      gradientDirection: 'diagonal',
+      gradientColor1: '#667eea',
+      gradientColor2: '#764ba2',
+      useCustomGradientText: false,  // false = use color pickers, true = use text input
       ratio: 'auto',
       zoom: 100,
       offsetX: 0,
@@ -268,12 +293,12 @@
 
     // Background gradients
     const backgrounds = {
-      cool: { type: 'gradient', value: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' },
-      beach: { type: 'gradient', value: 'linear-gradient(135deg, #14b8a6 0%, #0891b2 100%)' },
-      rose: { type: 'gradient', value: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 100%)' },
-      love: { type: 'gradient', value: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)' },
-      flower: { type: 'gradient', value: 'linear-gradient(135deg, #f9a8d4 0%, #fbbf24 100%)' },
-      sky: { type: 'gradient', value: 'linear-gradient(135deg, #38bdf8 0%, #e0f2fe 100%)' },
+      cool: { type: 'gradient', colors: ['#06b6d4', '#3b82f6'] },
+      beach: { type: 'gradient', colors: ['#14b8a6', '#0891b2'] },
+      rose: { type: 'gradient', colors: ['#f43f5e', '#ec4899'] },
+      love: { type: 'gradient', colors: ['#ec4899', '#8b5cf6'] },
+      flower: { type: 'gradient', colors: ['#f9a8d4', '#fbbf24'] },
+      sky: { type: 'gradient', colors: ['#38bdf8', '#e0f2fe'] },
       none: { type: 'transparent', value: null },
       solid: { type: 'solid', value: null },
       custom: { type: 'custom', value: null }
@@ -318,8 +343,12 @@
     const offsetYValue = document.getElementById('offsetYValue');
     const solidColorWrapper = document.getElementById('solidColorWrapper');
     const solidColorPicker = document.getElementById('solidColorPicker');
+    const gradientDirectionWrapper = document.getElementById('gradientDirectionWrapper');
     const customGradientWrapper = document.getElementById('customGradientWrapper');
     const customGradientInput = document.getElementById('customGradientInput');
+    const gradientColor1 = document.getElementById('gradientColor1');
+    const gradientColor2 = document.getElementById('gradientColor2');
+    const swapGradientColors = document.getElementById('swapGradientColors');
 
     // Update offset controls based on zoom
     function updateOffsetControls() {
@@ -335,6 +364,105 @@
       }
       if (offsetYGroup) {
         offsetYGroup.style.opacity = isZoomed ? '1' : '0.5';
+      }
+    }
+
+    // Generate gradient CSS from colors and direction
+    function generateGradient(color1, color2, direction) {
+      if (direction === 'diagonal') {
+        return `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`;
+      } else if (direction === 'vertical') {
+        return `linear-gradient(180deg, ${color1} 0%, ${color2} 100%)`;
+      } else if (direction === 'radial') {
+        return `radial-gradient(circle, ${color1} 0%, ${color2} 100%)`;
+      }
+      return `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`;
+    }
+
+    // Update gradient from color pickers
+    function updateGradientFromColors() {
+      const color1 = state.gradientColor1;
+      const color2 = state.gradientColor2;
+      const direction = state.gradientDirection;
+      state.customGradient = generateGradient(color1, color2, direction);
+    }
+
+    // Save settings to localStorage
+    function saveSettings() {
+      try {
+        const settings = {
+          background: state.background,
+          solidColor: state.solidColor,
+          customGradient: state.customGradient,
+          gradientDirection: state.gradientDirection,
+          gradientColor1: state.gradientColor1,
+          gradientColor2: state.gradientColor2,
+          useCustomGradientText: state.useCustomGradientText
+        };
+        localStorage.setItem('prettyScreenshotsSettings', JSON.stringify(settings));
+      } catch (e) {
+        console.error('Failed to save settings:', e);
+      }
+    }
+
+    // Load settings from localStorage
+    function loadSettings() {
+      try {
+        const saved = localStorage.getItem('prettyScreenshotsSettings');
+        if (saved) {
+          const settings = JSON.parse(saved);
+
+          // Restore state
+          state.background = settings.background || state.background;
+          state.solidColor = settings.solidColor || state.solidColor;
+          state.customGradient = settings.customGradient || state.customGradient;
+          state.gradientDirection = settings.gradientDirection || state.gradientDirection;
+          state.gradientColor1 = settings.gradientColor1 || state.gradientColor1;
+          state.gradientColor2 = settings.gradientColor2 || state.gradientColor2;
+          state.useCustomGradientText = settings.useCustomGradientText !== undefined ? settings.useCustomGradientText : state.useCustomGradientText;
+
+          // Update UI elements
+          solidColorPicker.value = state.solidColor;
+          customGradientInput.value = state.customGradient;
+          gradientColor1.value = state.gradientColor1;
+          gradientColor2.value = state.gradientColor2;
+
+          // Update background selection
+          document.querySelectorAll('.background-option').forEach(o => o.classList.remove('active'));
+          const activeBackground = document.querySelector(`.background-option[data-bg="${state.background}"]`);
+          if (activeBackground) {
+            activeBackground.classList.add('active');
+          }
+
+          // Show/hide appropriate wrapper
+          const bg = backgrounds[state.background];
+          if (state.background === 'solid') {
+            solidColorWrapper.classList.remove('hidden');
+            gradientDirectionWrapper.classList.add('hidden');
+            customGradientWrapper.classList.add('hidden');
+          } else if (state.background === 'custom' || (bg && bg.type === 'gradient')) {
+            solidColorWrapper.classList.add('hidden');
+            gradientDirectionWrapper.classList.remove('hidden');
+            if (state.background === 'custom') {
+              customGradientWrapper.classList.remove('hidden');
+            } else {
+              customGradientWrapper.classList.add('hidden');
+            }
+          } else {
+            solidColorWrapper.classList.add('hidden');
+            gradientDirectionWrapper.classList.add('hidden');
+            customGradientWrapper.classList.add('hidden');
+          }
+
+          // Update gradient direction button
+          document.querySelectorAll('.gradient-direction-btn').forEach(b => b.classList.remove('active'));
+          const activeDirection = document.querySelector(`.gradient-direction-btn[data-direction="${state.gradientDirection}"]`);
+          if (activeDirection) {
+            activeDirection.classList.add('active');
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load settings:', e);
       }
     }
 
@@ -456,18 +584,30 @@
           this.classList.add('active');
           state.background = this.dataset.bg;
 
-          // Show/hide solid color picker
+          const bg = backgrounds[state.background];
+
+          // Show/hide appropriate controls based on background type
           if (state.background === 'solid') {
             solidColorWrapper.classList.remove('hidden');
+            gradientDirectionWrapper.classList.add('hidden');
             customGradientWrapper.classList.add('hidden');
-          } else if (state.background === 'custom') {
+          } else if (state.background === 'custom' || (bg && bg.type === 'gradient')) {
+            // Show direction for all gradients (predefined and custom)
             solidColorWrapper.classList.add('hidden');
-            customGradientWrapper.classList.remove('hidden');
+            gradientDirectionWrapper.classList.remove('hidden');
+            if (state.background === 'custom') {
+              customGradientWrapper.classList.remove('hidden');
+            } else {
+              customGradientWrapper.classList.add('hidden');
+            }
           } else {
+            // None/transparent
             solidColorWrapper.classList.add('hidden');
+            gradientDirectionWrapper.classList.add('hidden');
             customGradientWrapper.classList.add('hidden');
           }
 
+          saveSettings();
           render();
         });
       });
@@ -476,6 +616,7 @@
       solidColorPicker.addEventListener('input', (e) => {
         state.solidColor = e.target.value;
         if (state.background === 'solid') {
+          saveSettings();
           render();
         }
       });
@@ -483,7 +624,64 @@
       // Custom gradient input
       customGradientInput.addEventListener('input', (e) => {
         state.customGradient = e.target.value.replace(/;$/, ''); // Remove trailing semicolon if present
+        state.useCustomGradientText = true;
         if (state.background === 'custom') {
+          saveSettings();
+          render();
+        }
+      });
+
+      // Gradient direction buttons
+      document.querySelectorAll('.gradient-direction-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.gradient-direction-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          state.gradientDirection = this.dataset.direction;
+
+          const bg = backgrounds[state.background];
+          if (state.background === 'custom' || (bg && bg.type === 'gradient')) {
+            if (state.background === 'custom') {
+              state.useCustomGradientText = false;
+              updateGradientFromColors();
+            }
+            saveSettings();
+            render();
+          }
+        });
+      });
+
+      // Gradient color pickers
+      gradientColor1.addEventListener('input', (e) => {
+        state.gradientColor1 = e.target.value;
+        state.useCustomGradientText = false;
+        if (state.background === 'custom') {
+          updateGradientFromColors();
+          saveSettings();
+          render();
+        }
+      });
+
+      gradientColor2.addEventListener('input', (e) => {
+        state.gradientColor2 = e.target.value;
+        state.useCustomGradientText = false;
+        if (state.background === 'custom') {
+          updateGradientFromColors();
+          saveSettings();
+          render();
+        }
+      });
+
+      // Swap gradient colors button
+      swapGradientColors.addEventListener('click', () => {
+        const temp = state.gradientColor1;
+        state.gradientColor1 = state.gradientColor2;
+        state.gradientColor2 = temp;
+        gradientColor1.value = state.gradientColor1;
+        gradientColor2.value = state.gradientColor2;
+        state.useCustomGradientText = false;
+        if (state.background === 'custom') {
+          updateGradientFromColors();
+          saveSettings();
           render();
         }
       });
@@ -502,6 +700,9 @@
       document.getElementById('downloadPNG').addEventListener('click', () => downloadImage('png'));
       document.getElementById('downloadJPEG').addEventListener('click', () => downloadImage('jpeg'));
       document.getElementById('copyClipboard').addEventListener('click', copyToClipboard);
+
+      // Load saved settings
+      loadSettings();
     }
 
     // Drag and drop handlers
@@ -732,43 +933,74 @@
 
           // If valid, parse and draw the gradient
           if (bgImage && bgImage !== 'none') {
-            const gradientMatch = state.customGradient.match(/linear-gradient\(([^,]+),(.+)\)/);
+            // Check for radial gradient
+            const radialMatch = state.customGradient.match(/radial-gradient\(([^)]+)\)/);
+            if (radialMatch) {
+              const params = radialMatch[1];
+              const colorStopsMatch = params.match(/,(.+)$/);
+              if (colorStopsMatch) {
+                const colorStops = colorStopsMatch[1].split(/,(?![^(]*\))/).map(s => s.trim());
 
-            if (gradientMatch) {
-              const angle = gradientMatch[1].trim();
-              const colorStops = gradientMatch[2].split(/,(?![^(]*\))/).map(s => s.trim());
+                // Create radial gradient centered
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const radius = Math.max(width, height) / 2;
+                const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
 
-              // Parse angle
-              let x0 = 0, y0 = 0, x1 = 0, y1 = height;
-              if (angle.includes('deg')) {
-                const degrees = parseFloat(angle);
-                const radians = (degrees - 90) * Math.PI / 180;
-                x1 = width * Math.cos(radians);
-                y1 = height * Math.sin(radians);
+                // Add color stops
+                colorStops.forEach(stop => {
+                  const match = stop.match(/(.+?)\s+(\d+%)/);
+                  if (match) {
+                    const color = match[1].trim();
+                    const position = parseFloat(match[2]) / 100;
+                    gradient.addColorStop(position, color);
+                  }
+                });
 
-                if (degrees === 90) {
-                  x0 = 0; y0 = 0; x1 = width; y1 = 0;
-                } else if (degrees === 135) {
-                  x0 = 0; y0 = 0; x1 = width; y1 = height;
-                } else if (degrees === 180) {
-                  x0 = 0; y0 = 0; x1 = 0; y1 = height;
-                }
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
               }
+            } else {
+              // Linear gradient
+              const gradientMatch = state.customGradient.match(/linear-gradient\(([^,]+),(.+)\)/);
 
-              const gradient = ctx.createLinearGradient(x0, y0, x1, y1);
+              if (gradientMatch) {
+                const angle = gradientMatch[1].trim();
+                const colorStops = gradientMatch[2].split(/,(?![^(]*\))/).map(s => s.trim());
 
-              // Add color stops
-              colorStops.forEach(stop => {
-                const match = stop.match(/(.+?)\s+(\d+%)/);
-                if (match) {
-                  const color = match[1].trim();
-                  const position = parseFloat(match[2]) / 100;
-                  gradient.addColorStop(position, color);
+                // Parse angle
+                let x0 = 0, y0 = 0, x1 = 0, y1 = height;
+                if (angle.includes('deg')) {
+                  const degrees = parseFloat(angle);
+
+                  if (degrees === 90) {
+                    x0 = 0; y0 = 0; x1 = width; y1 = 0;
+                  } else if (degrees === 135) {
+                    x0 = 0; y0 = 0; x1 = width; y1 = height;
+                  } else if (degrees === 180) {
+                    x0 = 0; y0 = 0; x1 = 0; y1 = height;
+                  } else {
+                    const radians = (degrees - 90) * Math.PI / 180;
+                    x1 = width * Math.cos(radians);
+                    y1 = height * Math.sin(radians);
+                  }
                 }
-              });
 
-              ctx.fillStyle = gradient;
-              ctx.fillRect(0, 0, width, height);
+                const gradient = ctx.createLinearGradient(x0, y0, x1, y1);
+
+                // Add color stops
+                colorStops.forEach(stop => {
+                  const match = stop.match(/(.+?)\s+(\d+%)/);
+                  if (match) {
+                    const color = match[1].trim();
+                    const position = parseFloat(match[2]) / 100;
+                    gradient.addColorStop(position, color);
+                  }
+                });
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+              }
             }
           } else {
             // Fallback to default if invalid
@@ -779,29 +1011,36 @@
           drawDefaultGradient(width, height);
         }
       } else if (bg.type === 'gradient') {
-        // Parse gradient
-        const gradientMatch = bg.value.match(/linear-gradient\(([^,]+),\s*([^)]+)\s+(\d+%),\s*([^)]+)\s+(\d+%)\)/);
+        // Generate gradient from colors with current direction
+        const color1 = bg.colors[0];
+        const color2 = bg.colors[1];
+        const direction = state.gradientDirection;
 
-        if (gradientMatch) {
-          const angle = gradientMatch[1];
-          const color1 = gradientMatch[2];
-          const color2 = gradientMatch[4];
-
-          // Create gradient
-          let gradient;
-          if (angle.includes('135deg')) {
-            gradient = ctx.createLinearGradient(0, 0, width, height);
-          } else {
-            gradient = ctx.createLinearGradient(0, 0, 0, height);
-          }
-
+        if (direction === 'radial') {
+          // Radial gradient
+          const centerX = width / 2;
+          const centerY = height / 2;
+          const radius = Math.max(width, height) / 2;
+          const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
           gradient.addColorStop(0, color1);
           gradient.addColorStop(1, color2);
-
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, width, height);
         } else {
-          console.warn('Invalid predefined gradient format.');
+          // Linear gradient
+          let x0 = 0, y0 = 0, x1 = 0, y1 = height;
+
+          if (direction === 'diagonal') {
+            x0 = 0; y0 = 0; x1 = width; y1 = height;
+          } else if (direction === 'vertical') {
+            x0 = 0; y0 = 0; x1 = 0; y1 = height;
+          }
+
+          const gradient = ctx.createLinearGradient(x0, y0, x1, y1);
+          gradient.addColorStop(0, color1);
+          gradient.addColorStop(1, color2);
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, width, height);
         }
       }
     }
